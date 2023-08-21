@@ -20,7 +20,7 @@ float TempC_LM35 = 0.0;
 int temp = 0;
 int placeValuesofTemp[4];
 
-int tempRefresh = 1000; // refrescar la temperatura cada 1 segundo
+int tempRefresh = 1000; // Actualizar  la temperatura cada 1 seg
 int sevSegRefresh = 5;
 
 unsigned long time_now = 0;
