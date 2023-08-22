@@ -168,7 +168,7 @@ void loop() {
   if (displaysOn && !temperatureTaken && reading == LOW) {
     int SNLM35_Raw = analogRead(SNLM35);
     float Voltage = readADC_Cal(SNLM35_Raw);
-    TempC_LM35 = Voltage / 10;
+    TempC_LM35 = ((Voltage/4095)*3.3)/0.01;
 
     temp = TempC_LM35 * 100;
 
