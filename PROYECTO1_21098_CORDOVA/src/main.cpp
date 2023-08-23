@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "driver/ledc.h"
 #include "esp_adc_cal.h"
+#include "config.h"
 
 #define SNLM35 35
 #define BTN_TEMP 13 
@@ -17,6 +18,9 @@ int Dot = 14;
 float TempC_LM35 = 0.0;
 int temp = 0;
 int placeValuesofTemp[4];
+
+// set up the 'counter' feed
+AdafruitIO_Feed *tempCanal = io.feed("Temperatura");
 
 int tempRefresh = 1000; // Actualizar la temperatura cada 1 seg
 int sevSegRefresh = 5;
@@ -66,9 +70,26 @@ void setup() {
   ledcAttachPin(servoPin, 3); // Asignar el pin del servo al canal 3
 
   Serial.begin(115200);
+   // wait for serial monitor to open
+  
+
+  Serial.print("Connecting to Adafruit IO");
+  // connect to io.adafruit.com
+  io.connect();
+  
+  // wait for a connection
+  while(io.status() < AIO_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  // we are connected
+  Serial.println();
+  Serial.println(io.statusText());
+
 }
 
 void loop() {
+
   int reading = digitalRead(BTN_TEMP);
   unsigned long currentTime = millis();
 
@@ -231,4 +252,18 @@ void loop() {
 
     temperatureTaken = true;
   }
+
+  // io.run(); is required for all sketches.
+  // it should always be present at the top of your loop
+  // function. it keeps the client connected to
+  // io.adafruit.com, and processes any incoming data.
+  io.run();
+
+   // save count to the 'counter' feed on Adafruit IO
+  Serial.print("sending -> ");
+  Serial.println(TempC_LM35);
+  tempCanal ->save(TempC_LM35);
+
+  delay(3000);
+ 
 }
