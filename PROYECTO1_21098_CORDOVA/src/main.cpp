@@ -1,6 +1,4 @@
-
 //KAREN LEONOR CÓRDOVA LÓPEZ
-
 #include <Arduino.h>
 #include "driver/ledc.h"
 #include "esp_adc_cal.h"
@@ -8,24 +6,25 @@
 #define SNLM35 35
 #define BTN_TEMP 13 
 #define RED 25
-#define GREEN 2
+#define GREEN 27
 #define BLUE 15
 #define servoPin 32 
 
 int segmentPins[7] = {18, 19, 21, 22, 23, 12, 26};
-int commonPins[3] = {27, 4, 5};
+int commonPins[3] = {2, 4, 5};
 int Dot = 14;
 
 float TempC_LM35 = 0.0;
 int temp = 0;
 int placeValuesofTemp[4];
 
-int tempRefresh = 1000; // Actualizar  la temperatura cada 1 seg
+int tempRefresh = 1000; // Actualizar la temperatura cada 1 seg
 int sevSegRefresh = 5;
 
 unsigned long time_now = 0;
 bool buttonPressed = false;
 bool temperatureTaken = false;
+bool temperatureUpdated = false; // Bandera para mostrar la temperatura actualizada en el monitor serial
 unsigned long lastButtonPressTime = 0;
 unsigned long debounceDelay = 50;
 bool displaysOn = false;
@@ -86,6 +85,7 @@ void loop() {
 
         // Actualizar la temperatura al presionar el botón nuevamente
         temperatureTaken = false;
+        temperatureUpdated = false;
       }
     }
   }
@@ -128,7 +128,65 @@ void loop() {
       }
     }
 
-    // Control de color del LED RGB según la temperatura
+    // Control de color del LED RGB y movimiento gradual del servo según la temperatura
+    int servoAngle;
+
+    if (TempC_LM35 < 23) {
+      servoAngle = map(int(TempC_LM35), 0, 22, 0, 0);
+    }else if (TempC_LM35 <= 23) {
+      servoAngle = map(int(TempC_LM35), 22, 23, 0, 3);
+    } else if (TempC_LM35 <= 24) {
+      servoAngle = map(int(TempC_LM35), 23, 24, 3, 10);
+    } else if (TempC_LM35 <= 25) {
+      servoAngle = map(int(TempC_LM35), 24, 25, 10, 20);
+    } else if (TempC_LM35 <= 26) {
+      servoAngle = map(int(TempC_LM35), 25, 26, 20, 30);
+    } else if (TempC_LM35 <= 27) {
+      servoAngle = map(int(TempC_LM35), 26, 27, 30, 40);
+    } else if (TempC_LM35 <= 28) {
+      servoAngle = map(int(TempC_LM35), 27, 28, 40, 50);
+    } else if (TempC_LM35 <= 29) {
+      servoAngle = map(int(TempC_LM35), 28, 29, 50, 60);
+    } else if (TempC_LM35 <= 30) {
+      servoAngle = map(int(TempC_LM35), 29, 30, 60, 70);
+    } else if (TempC_LM35 <= 31) {
+      servoAngle = map(int(TempC_LM35), 30, 31, 70, 80);
+    } else if (TempC_LM35 <= 32) {
+      servoAngle = map(int(TempC_LM35), 31, 32, 80, 90);
+    } else if (TempC_LM35 <= 33) {
+      servoAngle = map(int(TempC_LM35), 32, 33, 90, 100);
+    } else if (TempC_LM35 <= 34) {
+      servoAngle = map(int(TempC_LM35), 33, 34, 100, 110);
+    } else if (TempC_LM35 <= 35) {
+      servoAngle = map(int(TempC_LM35), 34, 35, 110, 120);
+    } else if (TempC_LM35 <= 36) {
+      servoAngle = map(int(TempC_LM35), 35, 36, 120, 130);
+    } else if (TempC_LM35 <= 37) {
+      servoAngle = map(int(TempC_LM35), 36, 37, 130, 140);
+    } else if (TempC_LM35 <= 38) {
+      servoAngle = map(int(TempC_LM35), 37, 38, 140, 150);
+    } else if (TempC_LM35 <= 39) {
+      servoAngle = map(int(TempC_LM35), 38, 39, 150, 160);
+    } else if (TempC_LM35 <= 40) {
+      servoAngle = map(int(TempC_LM35), 39, 40, 160, 170);
+    } else if (TempC_LM35 <= 41) {
+      servoAngle = map(int(TempC_LM35), 40, 41, 170, 180);
+    } else {
+      servoAngle = 180;
+    }
+
+    servoAngle = constrain(servoAngle, 0, 180); // Limitar el ángulo del servo entre 0 y 180 grados
+    ledcWrite(3, servoAngle); // Mover el servo gradualmente hacia el ángulo calculado
+
+    if (!temperatureUpdated) {
+      Serial.print("Temperatura: ");
+      Serial.print(TempC_LM35);
+      Serial.print(" °C, Ángulo: ");
+      Serial.print(servoAngle);
+      Serial.println("°");
+      temperatureUpdated = true;
+    }
+
     if (TempC_LM35 < 37.0) {
       ledcWrite(LEDC_CHANNEL_0, 0);     // Apagar LED rojo
       ledcWrite(LEDC_CHANNEL_1, 255);   // Encender LED verde
@@ -143,10 +201,6 @@ void loop() {
       ledcWrite(LEDC_CHANNEL_2, 0);     // Apagar LED azul
     }
 
-    // Control del servo motor
-    int servoPosition = map(TempC_LM35, 25, 40, 0, 180); // Ajuste para el rango de 25 a 40 grados
-    ledcWrite(3, servoPosition);
-
   } else {
     // Apagar todos los segmentos si la temperatura no se ha tomado
     // o si los displays no están encendidos
@@ -155,12 +209,10 @@ void loop() {
     }
     digitalWrite(Dot, LOW);
 
-    // Apagar el LED RGB si la temperatura no se ha tomado
+    // Apagar el LED RGB y detener el servo si la temperatura no se ha tomado
     ledcWrite(LEDC_CHANNEL_0, 0);
     ledcWrite(LEDC_CHANNEL_1, 0);
     ledcWrite(LEDC_CHANNEL_2, 0);
-
-    // Detener el servo si la temperatura no se ha tomado
     ledcWrite(3, 0);
   }
 
@@ -177,8 +229,6 @@ void loop() {
     placeValuesofTemp[1] = ((temp) / 100) % 10;
     placeValuesofTemp[0] = ((temp) / 1000) % 10;
 
-    Serial.print("Temperatura: ");
-    Serial.println(TempC_LM35);
     temperatureTaken = true;
   }
 }
