@@ -104,22 +104,24 @@ void setup() {
 //*************************************************************************************************
 void loop() {
 
-  int reading = digitalRead(BTN_TEMP);
-  unsigned long currentTime = millis();
+  int reading = digitalRead(BTN_TEMP); //Leer el estado actual de boton 
+  unsigned long currentTime = millis(); //obtener el tiempo actual en milisegundos
 
   if (!displaysOn && reading == LOW) {
-    displaysOn = true;
+    displaysOn = true;  // Cambiar el estado para encender los displays
   }
-
+// Si los displays estan encendidos 
   if (displaysOn) {
+    // Verifica si el estado actual del boton ha cambiado respecto al anterior
     if (reading != lastButtonState) {
-      lastButtonState = reading;
-
+      lastButtonState = reading;  //Actualizar el estado del botón, anterior
+        // Si el bonton a sido presionado y ha pasado suficiente tiempo desde la ultima vez (no rebotes)
       if (reading == LOW && (currentTime - lastButtonPressTime) > debounceDelay) {
-        lastButtonPressTime = currentTime;
+        lastButtonPressTime = currentTime;  //Actualizar el tiempo de la ultima actualización 
 
-        // Actualizar la temperatura al presionar el botón nuevamente
+        // Actualizar la bandera para indicar que se debe tomar la temperatura nuevamente
         temperatureTaken = false;
+        //Actualizar la bandera para indicar que la temperatura no se ha actualizado en el monitor serial  
         temperatureUpdated = false;
       }
     }
@@ -146,17 +148,17 @@ void loop() {
       {0, 0, 1}  // habilitar el dígito 3
     };
 
-    for (int n = 0; n < 3; n++) {
-      for (int i = 0; i < 3; i++) {
-        digitalWrite(commonPins[i], commonPinStates[n][i]);
-        (n == 1) ? digitalWrite(Dot, 1) : digitalWrite(Dot, 0);
+    for (int n = 0; n < 3; n++) {  // Loop iterar a traves de los tres dígitos 
+      for (int i = 0; i < 3; i++) {   //Loop para iterar a traves de los pines comunes (caton comun)
+        digitalWrite(commonPins[i], commonPinStates[n][i]);  //Establecer el estado de los pines comunes segun el digito actual 
+        (n == 1) ? digitalWrite(Dot, 1) : digitalWrite(Dot, 0);  //Encender o apagar el punto decimal en el segundo digito
       }
 
-      for (int j = 0; j < 7; j++) {
-        digitalWrite(segmentPins[j], number[placeValuesofTemp[n]][j]);
+      for (int j = 0; j < 7; j++) {  //Loop para iterar a traves de los segmentos de cada display
+        digitalWrite(segmentPins[j], number[placeValuesofTemp[n]][j]);  //Encender o apagar los segmnetos segun el digito y el numero 
       }
 
-      delay(sevSegRefresh);
+      delay(sevSegRefresh);  //Mantener los segmnetos encendidos durante un breve periodo  
 
       for (int i = 0; i < 7; i++) {
         digitalWrite(segmentPins[i], LOW); // Apagar todos los segmentos antes de cambiar de visualización
@@ -212,14 +214,15 @@ void loop() {
 
     servoAngle = constrain(servoAngle, 0, 180); // Limitar el ángulo del servo entre 0 y 180 grados
     ledcWrite(3, servoAngle); // Mover el servo gradualmente hacia el ángulo calculado
-
-    if (!temperatureUpdated) {
-      Serial.print("Temperatura: ");
-      Serial.print(TempC_LM35);
+     
+     //Verificar si la información de la temperatura ya ha sido actualizada
+    if (!temperatureUpdated) {   
+      Serial.print("Temperatura: ");   
+      Serial.print(TempC_LM35);    //Muestra el valor de temperatura en celsius 
       Serial.print(" °C, Ángulo: ");
-      Serial.print(servoAngle);
+      Serial.print(servoAngle);     //Muestra el valorr del angulo 
       Serial.println("°");
-      temperatureUpdated = true;
+      temperatureUpdated = true;   //Marcar que la información ha sido actualizada 
     }
 
     if (TempC_LM35 < 37.0) {
@@ -253,17 +256,17 @@ void loop() {
 
   // Leer y mostrar la temperatura si el botón se ha presionado
   if (displaysOn && !temperatureTaken && reading == LOW) {
-    int SNLM35_Raw = analogRead(SNLM35);
-    float Voltage = readADC_Cal(SNLM35_Raw);
+    int SNLM35_Raw = analogRead(SNLM35);  //Calcular el voltaje correpsondiente al valor del sensor (real)
+    float Voltage = readADC_Cal(SNLM35_Raw); // Calclar la temperatura en grados Celsius usando la relación del LM35
     TempC_LM35 = ((Voltage/4095)*3.3)/0.01;
-
+    // Calcular el valor de la temperatura multiplicando por 100 para trabajar con decimales  
     temp = TempC_LM35 * 100;
-
-    placeValuesofTemp[3] = ((temp) / 1) % 10;
-    placeValuesofTemp[2] = ((temp) / 10) % 10;
-    placeValuesofTemp[1] = ((temp) / 100) % 10;
-    placeValuesofTemp[0] = ((temp) / 1000) % 10;
-
+     //Descomponer el valor de la temperatura en sus digitos individuales 
+    placeValuesofTemp[3] = ((temp) / 1) % 10;   //dígito de la unidades (0-9)
+    placeValuesofTemp[2] = ((temp) / 10) % 10;  // digito de las decenas (0-9)
+    placeValuesofTemp[1] = ((temp) / 100) % 10;  //digito de las centenas (0-9)
+    placeValuesofTemp[0] = ((temp) / 1000) % 10;  //digito de los millares (0-9)
+     //Marca que la temperatura ha sido tomada 
     temperatureTaken = true;
   }
 
