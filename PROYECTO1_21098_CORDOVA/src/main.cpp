@@ -29,8 +29,6 @@ float TempC_LM35 = 0.0;
 int temp = 0;
 int placeValuesofTemp[4];
 //*******************************************************************************************************
-// set up the 'counter' feed
-AdafruitIO_Feed *tempCanal = io.feed("Temperatura");
 
 int tempRefresh = 1000; // Actualizar la temperatura cada 1 seg
 int sevSegRefresh = 5;
@@ -43,6 +41,10 @@ unsigned long lastButtonPressTime = 0;  //Tiempo en milisegundos
 unsigned long debounceDelay = 50;  // Tiempo de espera para evitar rebotes del boton 
 bool displaysOn = false;            //Bandera para indicar si los displays estan encendidos
 int lastButtonState = HIGH;         //Estado del boton 
+
+// set up the 'counter' feed
+AdafruitIO_Feed *tempCanal = io.feed("Temperatura");
+
 
 //*****************************************************************************************************************
 // función para calibrar el valor ADC (convertir analogico a digital)
@@ -107,8 +109,13 @@ void loop() {
   int reading = digitalRead(BTN_TEMP); //Leer el estado actual de boton 
   unsigned long currentTime = millis(); //obtener el tiempo actual en milisegundos
 
+ 
+
   if (!displaysOn && reading == LOW) {
     displaysOn = true;  // Cambiar el estado para encender los displays
+
+  
+ 
   }
 // Si los displays estan encendidos 
   if (displaysOn) {
@@ -128,6 +135,7 @@ void loop() {
   }
 
   if (temperatureTaken) {
+ 
     // Mostrar la temperatura si ha sido tomada y el botón se ha presionado
     int number[10][7] = {
       {1, 1, 1, 1, 1, 1, 0}, // 0
@@ -223,6 +231,19 @@ void loop() {
       Serial.print(servoAngle);     //Muestra el valorr del angulo 
       Serial.println("°");
       temperatureUpdated = true;   //Marcar que la información ha sido actualizada 
+      
+           // it should always be present at the top of your loop
+          // function. it keeps the client connected to
+          // io.adafruit.com, and processes any incoming data.
+          io.run();
+
+          // save count to the 'counter' feed on Adafruit IO
+          Serial.print("sending -> ");
+          Serial.println(TempC_LM35);
+          tempCanal ->save(TempC_LM35);
+
+          delay(3000);
+
     }
 
     if (TempC_LM35 < 37.0) {
@@ -254,10 +275,13 @@ void loop() {
     ledcWrite(3, 0);
   }
 
+ 
+ 
+
   // Leer y mostrar la temperatura si el botón se ha presionado
   if (displaysOn && !temperatureTaken && reading == LOW) {
     int SNLM35_Raw = analogRead(SNLM35);  //Calcular el voltaje correpsondiente al valor del sensor (real)
-    float Voltage = readADC_Cal(SNLM35_Raw); // Calclar la temperatura en grados Celsius usando la relación del LM35
+    float Voltage = readADC_Cal(SNLM35_Raw); // Calcular la temperatura en grados Celsius usando la relación del LM35
     TempC_LM35 = ((Voltage/4095)*3.3)/0.01;
     // Calcular el valor de la temperatura multiplicando por 100 para trabajar con decimales  
     temp = TempC_LM35 * 100;
@@ -270,18 +294,6 @@ void loop() {
     temperatureTaken = true;
   }
 
-  // io.run(); is required for all sketches.
-  // it should always be present at the top of your loop
-  // function. it keeps the client connected to
-  // io.adafruit.com, and processes any incoming data.
-  io.run();
-
-   // save count to the 'counter' feed on Adafruit IO
-  Serial.print("sending -> ");
-  Serial.println(TempC_LM35);
-  tempCanal ->save(TempC_LM35);
-
-  delay(3000);
  
 }
  
