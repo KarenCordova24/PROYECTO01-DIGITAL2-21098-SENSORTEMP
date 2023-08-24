@@ -1,8 +1,15 @@
+//***************************************************************
 //KAREN LEONOR CÓRDOVA LÓPEZ
+// PROYECTO 1-D2-SENSOR DE TEMPERATURA
+//****************************************************************
+//Librerias
 #include <Arduino.h>
 #include "driver/ledc.h"
 #include "esp_adc_cal.h"
 #include "config.h"
+
+//*****************************************************************
+// Definición de etiquetas 
 
 #define SNLM35 35
 #define BTN_TEMP 13 
@@ -10,35 +17,43 @@
 #define GREEN 27
 #define BLUE 15
 #define servoPin 32 
+//***********************************************************************************
+//Definición de los pines para los segmentos y dígitos comunes del display
 
 int segmentPins[7] = {18, 19, 21, 22, 23, 12, 26};
 int commonPins[3] = {2, 4, 5};
 int Dot = 14;
-
+//*****************************************************************************************+
+// Variables para la temperatura
 float TempC_LM35 = 0.0;
 int temp = 0;
 int placeValuesofTemp[4];
-
+//*******************************************************************************************************
 // set up the 'counter' feed
 AdafruitIO_Feed *tempCanal = io.feed("Temperatura");
 
 int tempRefresh = 1000; // Actualizar la temperatura cada 1 seg
 int sevSegRefresh = 5;
 
-unsigned long time_now = 0;
-bool buttonPressed = false;
-bool temperatureTaken = false;
+unsigned long time_now = 0;   //varible para almacenar el tiempo actual 
+bool buttonPressed = false;    //bandera para indicar si el boton esta presionado 
+bool temperatureTaken = false; //bandera para indicar si se ha tomado la temperatura
 bool temperatureUpdated = false; // Bandera para mostrar la temperatura actualizada en el monitor serial
-unsigned long lastButtonPressTime = 0;
-unsigned long debounceDelay = 50;
-bool displaysOn = false;
-int lastButtonState = HIGH;
+unsigned long lastButtonPressTime = 0;  //Tiempo en milisegundos
+unsigned long debounceDelay = 50;  // Tiempo de espera para evitar rebotes del boton 
+bool displaysOn = false;            //Bandera para indicar si los displays estan encendidos
+int lastButtonState = HIGH;         //Estado del boton 
 
+//*****************************************************************************************************************
+// función para calibrar el valor ADC (convertir analogico a digital)
 uint32_t readADC_Cal(int ADC_Raw) {
   esp_adc_cal_characteristics_t adc_chars;
   esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
   return (esp_adc_cal_raw_to_voltage(ADC_Raw, &adc_chars));
 }
+
+//***********************************************************************************************************************************
+// Configuración 
 
 void setup() {
   analogReadResolution(12);
@@ -57,7 +72,7 @@ void setup() {
   pinMode(GREEN, OUTPUT);
   pinMode(BLUE, OUTPUT);
 
-  // Configuración de los temporizadores del LEDC
+  // Configuración de los temporizadores del LEDC (PWM)
   ledcSetup(LEDC_CHANNEL_0, 5000, 13);
   ledcSetup(LEDC_CHANNEL_1, 5000, 13);
   ledcSetup(LEDC_CHANNEL_2, 5000, 13);
@@ -71,8 +86,6 @@ void setup() {
 
   Serial.begin(115200);
    // wait for serial monitor to open
-  
-
   Serial.print("Connecting to Adafruit IO");
   // connect to io.adafruit.com
   io.connect();
@@ -87,7 +100,8 @@ void setup() {
   Serial.println(io.statusText());
 
 }
-
+//Loop Principal 
+//*************************************************************************************************
 void loop() {
 
   int reading = digitalRead(BTN_TEMP);
@@ -267,3 +281,4 @@ void loop() {
   delay(3000);
  
 }
+ 
