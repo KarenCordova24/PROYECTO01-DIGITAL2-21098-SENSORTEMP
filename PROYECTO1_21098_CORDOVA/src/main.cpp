@@ -42,8 +42,10 @@ unsigned long debounceDelay = 50;  // Tiempo de espera para evitar rebotes del b
 bool displaysOn = false;            //Bandera para indicar si los displays estan encendidos
 int lastButtonState = HIGH;         //Estado del boton 
 
+
 // set up the 'counter' feed
 AdafruitIO_Feed *tempCanal = io.feed("Temperatura");
+AdafruitIO_Feed *tempCanal2 = io.feed("angulo");
 
 
 //*****************************************************************************************************************
@@ -240,7 +242,9 @@ void loop() {
           // save count to the 'counter' feed on Adafruit IO
           Serial.print("sending -> ");
           Serial.println(TempC_LM35);
+          Serial.println(servoAngle);
           tempCanal ->save(TempC_LM35);
+          tempCanal2->save(servoAngle);
 
           delay(3000);
 
@@ -283,6 +287,7 @@ void loop() {
     int SNLM35_Raw = analogRead(SNLM35);  //Calcular el voltaje correpsondiente al valor del sensor (real)
     float Voltage = readADC_Cal(SNLM35_Raw); // Calcular la temperatura en grados Celsius usando la relación del LM35
     TempC_LM35 = ((Voltage/4095)*3.3)/0.01;
+    
     // Calcular el valor de la temperatura multiplicando por 100 para trabajar con decimales  
     temp = TempC_LM35 * 100;
      //Descomponer el valor de la temperatura en sus digitos individuales 
