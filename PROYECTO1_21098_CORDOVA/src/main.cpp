@@ -16,7 +16,7 @@
 #define RED 25
 #define GREEN 27
 #define BLUE 15
-#define servoPin 32 
+#define Mservo 32 
 //***********************************************************************************
 //Definición de los pines para los segmentos y dígitos comunes del display
 
@@ -24,12 +24,12 @@ int segmentPins[7] = {18, 19, 21, 22, 23, 12, 26};
 int commonPins[3] = {2, 4, 5};
 int Dot = 14;
 //*****************************************************************************************+
-// Variables para la temperatura
+// Variables para la temperatura/variables globales
 float TempC_LM35 = 0.0;
 int temp = 0;
 int placeValuesofTemp[4];
 //*******************************************************************************************************
-
+//Variables globales
 int tempRefresh = 1000; // Actualizar la temperatura cada 1 seg
 int sevSegRefresh = 5;
 
@@ -86,7 +86,7 @@ void setup() {
 
   // Configuración del módulo LEDC para el servo
   ledcSetup(3, 50, 10); // Canal 3 para el servo, frecuencia 50 Hz, resolución de 10 bits
-  ledcAttachPin(servoPin, 3); // Asignar el pin del servo al canal 3
+  ledcAttachPin(Mservo, 3); // Asignar el pin del servo al canal 3
 
   Serial.begin(115200);
    // wait for serial monitor to open
@@ -292,7 +292,7 @@ void loop() {
   if (displaysOn && !temperatureTaken && reading == LOW) {
     int SNLM35_Raw = analogRead(SNLM35);  //Calcular el voltaje correpsondiente al valor del sensor (real)
     float Voltage = readADC_Cal(SNLM35_Raw); // Calcular la temperatura en grados Celsius usando la relación del LM35
-    TempC_LM35 = ((Voltage/4095)*3.3)/0.01;
+    TempC_LM35 = ((SNLM35_Raw*5000)/4095)/10;
     
     // Calcular el valor de la temperatura multiplicando por 100 para trabajar con decimales  
     temp = TempC_LM35 * 100;
@@ -307,4 +307,4 @@ void loop() {
 
  
 }
- 
+  
