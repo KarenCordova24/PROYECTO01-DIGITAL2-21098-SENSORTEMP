@@ -178,52 +178,42 @@ void loop() {
     // Control de color del LED RGB y movimiento gradual del servo según la temperatura
     int servoAngle;
 
-    if (TempC_LM35 < 17) {
-      servoAngle = map(int(TempC_LM35), 0, 16, 0, 0);
-    }else if (TempC_LM35 <= 17) {
-      servoAngle = map(int(TempC_LM35), 16, 17, 0, 4);
-    } else if (TempC_LM35 <= 18) {
-      servoAngle = map(int(TempC_LM35), 17, 18, 8, 10);
-    } else if (TempC_LM35 <= 19) {
-      servoAngle = map(int(TempC_LM35), 18, 19, 10, 20);
-    } else if (TempC_LM35 <= 20) {
-      servoAngle = map(int(TempC_LM35), 19, 20, 20, 30);
-    } else if (TempC_LM35 <= 21) {
-      servoAngle = map(int(TempC_LM35), 20, 21, 30, 40);
-    } else if (TempC_LM35 <= 22) {
-      servoAngle = map(int(TempC_LM35), 21, 22, 40, 50);
+    if (TempC_LM35 < 23) {
+      servoAngle = map(int(TempC_LM35), 0, 22, 0, 10);
     } else if (TempC_LM35 <= 23) {
-      servoAngle = map(int(TempC_LM35), 22, 23, 50, 60);
+      servoAngle = map(int(TempC_LM35), 22, 23, 10, 20);
     } else if (TempC_LM35 <= 24) {
-      servoAngle = map(int(TempC_LM35), 23, 24, 60, 70);
+      servoAngle = map(int(TempC_LM35), 23, 24, 20, 30);
     } else if (TempC_LM35 <= 25) {
-      servoAngle = map(int(TempC_LM35), 24, 25, 70, 80);
+      servoAngle = map(int(TempC_LM35), 24, 25, 30, 40);
     } else if (TempC_LM35 <= 26) {
-      servoAngle = map(int(TempC_LM35), 25, 26, 80, 90);
+      servoAngle = map(int(TempC_LM35), 25, 26, 40, 50);
     } else if (TempC_LM35 <= 27) {
-      servoAngle = map(int(TempC_LM35), 26, 27, 90, 100);
+      servoAngle = map(int(TempC_LM35), 26, 27, 50, 60);
     } else if (TempC_LM35 <= 28) {
-      servoAngle = map(int(TempC_LM35), 27, 28, 100, 110);
+      servoAngle = map(int(TempC_LM35), 27, 28, 60, 70);
     } else if (TempC_LM35 <= 29) {
-      servoAngle = map(int(TempC_LM35), 28, 29, 110, 120);
+      servoAngle = map(int(TempC_LM35), 28, 29, 70, 80);
     } else if (TempC_LM35 <= 30) {
-      servoAngle = map(int(TempC_LM35), 29, 30, 120, 130);
+      servoAngle = map(int(TempC_LM35), 29, 30, 80, 90);
     } else if (TempC_LM35 <= 31) {
-      servoAngle = map(int(TempC_LM35), 30, 31, 130, 140);
+      servoAngle = map(int(TempC_LM35), 30, 31, 90, 100);
     } else if (TempC_LM35 <= 32) {
-      servoAngle = map(int(TempC_LM35), 31, 32, 140, 150);
+      servoAngle = map(int(TempC_LM35), 31, 32, 100, 110);
     } else if (TempC_LM35 <= 33) {
-      servoAngle = map(int(TempC_LM35), 32, 33, 150, 150);
+      servoAngle = map(int(TempC_LM35), 32, 33, 110, 120);
     } else if (TempC_LM35 <= 34) {
-      servoAngle = map(int(TempC_LM35), 33, 34, 160, 160);
+      servoAngle = map(int(TempC_LM35), 33, 34, 120, 130);
     } else if (TempC_LM35 <= 35) {
-      servoAngle = map(int(TempC_LM35), 34, 35, 160, 165);
+      servoAngle = map(int(TempC_LM35), 34, 35, 130, 140);
     } else if (TempC_LM35 <= 36) {
-      servoAngle = map(int(TempC_LM35), 35, 36, 160, 170);
+      servoAngle = map(int(TempC_LM35), 35, 36, 140, 150);
     } else if (TempC_LM35 <= 37) {
-      servoAngle = map(int(TempC_LM35), 36, 37, 160, 175);
+      servoAngle = map(int(TempC_LM35), 36, 37, 150, 160);
     } else if (TempC_LM35 <= 38) {
-      servoAngle = map(int(TempC_LM35), 37, 38, 170, 180);
+      servoAngle = map(int(TempC_LM35), 37, 38, 160, 170);
+    } else if (TempC_LM35 <= 39) {
+      servoAngle = map(int(TempC_LM35), 38, 39, 170, 180);
     } else {
       servoAngle = 180;
     }
@@ -256,15 +246,15 @@ void loop() {
 
     }
 
-    if (TempC_LM35 < 20.0) {
+    if (TempC_LM35 < 23.0) {
       ledcWrite(LEDC_CHANNEL_0, 0);     // Apagar LED rojo
       ledcWrite(LEDC_CHANNEL_1, 255);   // Encender LED verde
       ledcWrite(LEDC_CHANNEL_2, 0);     // Apagar LED azul
-    } else if (TempC_LM35 >= 20.1 && TempC_LM35 <= 30) {
+    } else if (TempC_LM35 >= 23.1 && TempC_LM35 <= 26) {
       ledcWrite(LEDC_CHANNEL_0, 255);   // Encender LED rojo
       ledcWrite(LEDC_CHANNEL_1, 0);   // Encender LED verde
       ledcWrite(LEDC_CHANNEL_2, 255);     // Apagar LED azul
-    } else {
+    } else if(TempC_LM35 >= 26) {
       ledcWrite(LEDC_CHANNEL_0, 255);   // Encender LED rojo
       ledcWrite(LEDC_CHANNEL_1, 0);     // Apagar LED verde
       ledcWrite(LEDC_CHANNEL_2, 0);     // Apagar LED azul
